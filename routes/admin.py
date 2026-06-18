@@ -32,3 +32,13 @@ def reject_event(event_id):
     except LookupError as e:
         return jsonify({"error": str(e)}), 404
     return jsonify({"message": "Event odbijen."}), 200
+
+
+@admin_bp.route("/events/<int:event_id>", methods=["DELETE"])
+@require_admin
+def admin_delete_event(event_id):
+    try:
+        events_service.admin_delete_event(event_id)
+    except LookupError as e:
+        return jsonify({"error": str(e)}), 404
+    return jsonify({"message": "Event obrisan."}), 200

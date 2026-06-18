@@ -152,6 +152,37 @@ def set_event_status(event_id, status):
                 raise LookupError("Event nije pronađen.")
 
 
+def admin_delete_event(event_id):
+    participants = []
+    event_title = None
+    event_date_str = None
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT title, event_date FROM events WHERE id = %s;",
+                (event_id,),
+            )
+            row = cur.fetchone()
+            if not row:
+                raise LookupError("Event nije pronađen.")
+            event_title = row[0]
+            event_date_str = row[1].strftime("%-d. %-m. %Y.") if row[1] else "–"
+            cur.execute(
+                """
+                SELECT u.first_name, u.email
+                FROM event_participants ep
+                JOIN users u ON u.id = ep.user_id
+                WHERE ep.event_id = %s;
+                """,
+                (event_id,),
+            )
+            participants = cur.fetchall()
+            cur.execute("DELETE FROM events WHERE id = %s;", (event_id,))
+
+    for first_name, email in participants:
+        email_service.send_event_cancelled(email, first_name, event_title, event_date_str)
+
+
 def join_event(event_id, user_id):
     event_info = None
     user_info = None
