@@ -3,6 +3,7 @@ import logging
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+from routes.admin import admin_bp
 from routes.categories import categories_bp
 from routes.cities import cities_bp
 from routes.events import events_bp
@@ -14,6 +15,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 app = Flask(__name__)
 CORS(app)
 
+app.register_blueprint(admin_bp)
 app.register_blueprint(categories_bp)
 app.register_blueprint(cities_bp)
 app.register_blueprint(neighborhoods_bp)

@@ -96,10 +96,19 @@ CREATE TABLE IF NOT EXISTS public.event_participants (
 """
 
 SEED_CATEGORIES = [
-    (1, "yoga"),
-    (2, "Yoga"),
-    (3, "Koncert"),
-    (4, "Radionica"),
+    (1, "Yoga / Meditacija"),
+    (2, "Glazba / Koncert"),
+    (3, "Sport i rekreacija"),
+    (4, "Radionica / Edukacija"),
+    (5, "Kultura i izložbe"),
+    (6, "Hrana i piće"),
+    (7, "Zabava / Party"),
+    (8, "Volontiranje"),
+    (9, "Outdoor / Priroda"),
+    (10, "Wellness"),
+    (11, "Tržnica / Sajam"),
+    (12, "Djeca i obitelj"),
+    (13, "Film i mediji"),
 ]
 
 SEED_CITIES = [
@@ -186,6 +195,17 @@ def run():
 
     print("Creating tables and sequences...")
     cur.execute(DDL)
+
+    print("Applying schema migrations...")
+    cur.execute("""
+        ALTER TABLE public.events
+            ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending';
+        UPDATE public.events SET status = 'approved' WHERE status = 'pending';
+        UPDATE public.categories SET name = 'Yoga / Meditacija' WHERE id = 1;
+        UPDATE public.categories SET name = 'Glazba / Koncert' WHERE id = 2;
+        UPDATE public.categories SET name = 'Sport i rekreacija' WHERE id = 3;
+        UPDATE public.categories SET name = 'Radionica / Edukacija' WHERE id = 4;
+    """)
 
     print("Seeding categories...")
     for cat_id, name in SEED_CATEGORIES:
